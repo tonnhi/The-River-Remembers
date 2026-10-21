@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a9410c83a9cdfc4fb01f10cb2296fd5, type: 3}
+  m_Name: Decision_CommuneRequest
+  m_EditorClassIdentifier: Assembly-CSharp::ConNuoc.Data.DecisionSO
+  decisionId: commune_request
+  npcName: "Ch\xFA H\xF9ng (commune officer)"
+  requiredTier: 2
+  requiredFlag: 
+  oneTimeOnly: 1
+  promptText: '"A drain upgrade means digging, pipes and money the commune doesn''t have this year. Show me this isn''t one family''s complaint, and I can put it forward."'
+  promptVariants:
+  - requiredFlag: rain_severe
+    promptText: '"I saw the road after the rain. Families waded to school and the market flooded. I can''t ignore that. But a drain upgrade still means money the commune doesn''t have. Show me this isn''t one family''s complaint."'
+  - requiredFlag: rain_mild
+    promptText: '"I hear the road to school stayed open in the rain. Good. But the drain is still weak. An upgrade means digging, pipes and money the commune doesn''t have. Show me it''s worth it."'
+  options:
+  - optionText: 'Present what you''ve gathered: the drain, the reeds, the market and the neighbours behind you.'
+    requiredTier: 2
+    immediateDeltas:
+    - meter: 1
+      amount: 10
+    - meter: 0
+      amount: 15
+    - meter: 2
+      amount: -5
+    unlocksTier: 0
+    tierUnlocked: 0
+    setsFlag: petition_evidence
+    hasDelayedConsequence: 0
+    delayedConsequence:
+      seasonsFromNow: 0
+      explanationText: 
+      deltas: []
+      setsFlag: 
+  - optionText: 'Ask for a quick fix: dig the drain deeper.'
+    requiredTier: 2
+    immediateDeltas:
+    - meter: 1
+      amount: 5
+    - meter: 0
+      amount: -5
+    - meter: 2
+      amount: -10
+    unlocksTier: 0
+    tierUnlocked: 0
+    setsFlag: petition_quickfix
+    hasDelayedConsequence: 0
+    delayedConsequence:
+      seasonsFromNow: 0
+      explanationText: 
+      deltas: []
+      setsFlag: 

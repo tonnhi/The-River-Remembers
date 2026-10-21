@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a9410c83a9cdfc4fb01f10cb2296fd5, type: 3}
+  m_Name: Decision_CanalReeds
+  m_EditorClassIdentifier: Assembly-CSharp::ConNuoc.Data.DecisionSO
+  decisionId: canal_reeds
+  npcName: "Ch\xFA T\u01B0 (farmer)"
+  requiredTier: 0
+  requiredFlag: 
+  oneTimeOnly: 1
+  promptText: '"I''m clearing the reeds along the canal bank for one more row of rice, con. Land is tight this year, and reeds don''t feed anyone."'
+  promptVariants:
+  - requiredFlag: bins_set
+    promptText: "\"C\xF4 Hoa's bins are up already? The market is cleaner, I'll give you that. But I still need that extra row of rice, con. The reeds don't feed anyone.\""
+  - requiredFlag: kept_clearing_alone
+    promptText: '"I hear you''ve been clearing that drain on your own, con. You can''t do everything yourself. And I''m still clearing these reeds for one more row of rice."'
+  options:
+  - optionText: Ask him to leave a strip of reeds by the drain.
+    requiredTier: 0
+    immediateDeltas:
+    - meter: 0
+      amount: 10
+    - meter: 2
+      amount: -5
+    - meter: 1
+      amount: 5
+    unlocksTier: 1
+    tierUnlocked: 1
+    setsFlag: reeds_kept
+    hasDelayedConsequence: 1
+    delayedConsequence:
+      seasonsFromNow: 2
+      explanationText: "B\xE0 S\xE1u: \"Heavy rain came overnight. The reeds held the bank and slowed the water, so the road to school stayed open.\""
+      deltas:
+      - meter: 0
+        amount: 5
+      - meter: 1
+        amount: 5
+      setsFlag: rain_mild
+  - optionText: Let him clear them. The rice matters more right now.
+    requiredTier: 0
+    immediateDeltas:
+    - meter: 2
+      amount: 10
+    - meter: 0
+      amount: -10
+    unlocksTier: 0
+    tierUnlocked: 0
+    setsFlag: reeds_cleared
+    hasDelayedConsequence: 1
+    delayedConsequence:
+      seasonsFromNow: 2
+      explanationText: "B\xE0 S\xE1u: \"Heavy rain came overnight. With the reeds gone, nothing slowed the water. It ran over the bank and onto the road to school.\""
+      deltas:
+      - meter: 0
+        amount: -10
+      - meter: 1
+        amount: -10
+      setsFlag: rain_severe

@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a9410c83a9cdfc4fb01f10cb2296fd5, type: 3}
+  m_Name: Decision_CleanUp
+  m_EditorClassIdentifier: Assembly-CSharp::ConNuoc.Data.DecisionSO
+  decisionId: clean_up
+  npcName: "B\xE0 S\xE1u"
+  requiredTier: 1
+  requiredFlag: 
+  oneTimeOnly: 1
+  promptText: '"You''ve listened, con. If the neighbours pitch in, we could clear the drain together and replant the bank. It''s more than one girl can do, but it isn''t more than a village can do."'
+  promptVariants:
+  - requiredFlag: bins_set
+    promptText: '"The market bins are working, and people are talking about it. You''ve been listening, con. If the neighbours pitch in, we could clear the drain together and replant the bank."'
+  - requiredFlag: reeds_kept
+    promptText: "\"You asked Ch\xFA T\u01B0 to leave the reeds, and he did. People noticed. If the neighbours pitch in, we could clear the drain together and replant the bank. It isn't more than a village can do.\""
+  options:
+  - optionText: Organise the neighbourhood clean-up and replanting.
+    requiredTier: 1
+    immediateDeltas:
+    - meter: 1
+      amount: 15
+    - meter: 0
+      amount: 10
+    - meter: 2
+      amount: -10
+    unlocksTier: 1
+    tierUnlocked: 2
+    setsFlag: cleanup_done
+    hasDelayedConsequence: 0
+    delayedConsequence:
+      seasonsFromNow: 0
+      explanationText: 
+      deltas: []
+      setsFlag: 
+  - optionText: Not yet. I need to think about it more.
+    requiredTier: 1
+    immediateDeltas:
+    - meter: 2
+      amount: 5
+    - meter: 1
+      amount: -5
+    unlocksTier: 0
+    tierUnlocked: 0
+    setsFlag: 
+    hasDelayedConsequence: 0
+    delayedConsequence:
+      seasonsFromNow: 0
+      explanationText: 
+      deltas: []
+      setsFlag: 
