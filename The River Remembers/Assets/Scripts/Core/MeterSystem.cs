@@ -5,11 +5,6 @@ using ConNuoc.Data;
 
 namespace ConNuoc.Core
 {
-    /// <summary>
-    /// Holds the three systems-map meters (0-100, starts at 50) and fires an event whenever
-    /// one changes, so the HUD and anything else can react without polling.
-    /// Attach to a persistent "GameManager" object; access via MeterSystem.Instance.
-    /// </summary>
     public class MeterSystem : MonoBehaviour
     {
         public static MeterSystem Instance { get; private set; }
@@ -20,7 +15,6 @@ namespace ConNuoc.Core
 
         private readonly Dictionary<MeterType, int> _values = new Dictionary<MeterType, int>();
 
-        /// <summary>Fired after any meter changes: (meter, newValue, delta).</summary>
         public event Action<MeterType, int, int> OnMeterChanged;
 
         private void Awake()

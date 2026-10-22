@@ -7,28 +7,12 @@ using ConNuoc.UI;
 
 namespace ConNuoc.Core
 {
-    /// <summary>
-    /// Ends the game when there is nothing left for the player to do, so every path through
-    /// the village finishes somewhere instead of leaving the player stuck.
-    ///
-    /// After each decision it waits a moment (so unlock/consequence banners are seen), then:
-    ///  - if any NPC still has something to offer -> keep playing
-    ///  - else if a delayed consequence is still pending -> let a season pass so it can land
-    ///    (it may open a new conversation, e.g. the repair route)
-    ///  - else -> show an ending that depends on how far up the Agency Ladder you climbed
-    ///    and how the three meters ended up.
-    ///
-    /// Put on the GameManager object. Needs StoryPanelUI in the scene.
-    /// </summary>
     public class EndingManager : MonoBehaviour
     {
         [SerializeField] private float checkDelaySeconds = 2.5f;
 
-        [Tooltip("Reload the scene when the ending is dismissed so players can try a different " +
-                 "path. Needs the scene added to File > Build Profiles (Scene List), otherwise leave off.")]
         [SerializeField] private bool restartSceneAfterEnding = false;
 
-        [Header("Ending text (edit freely)")]
         [TextArea(3, 8)]
         [SerializeField]
         private string personalEndingText =
@@ -44,7 +28,6 @@ namespace ConNuoc.Core
         private string institutionalEndingText =
             "You took what the village had learned to the commune office, and Xóm Sen was heard. Whether it ends as a lasting fix or a quick one depends on what you asked for.\n\nWho benefited? Who gave something up? What do you think caused the flooding in the first place?";
 
-        [Header("Institutional endings (chosen by what you asked the commune for)")]
         [TextArea(3, 8)]
         [SerializeField]
         private string institutionalEvidenceEnding =
@@ -55,7 +38,6 @@ namespace ConNuoc.Core
         private string institutionalQuickFixEnding =
             "The commune is digging the drain deeper this month, and the water will clear faster for now. But nobody asked why the road was flooding in the first place, and the problem may return with the next heavy rain.\n\nCould another action have solved part of the problem?";
 
-        [Header("What happened to the reeds (added to every ending)")]
         [TextArea(2, 4)]
         [SerializeField]
         private string reedsKeptLine = "The strip of reeds you asked Chú Tư to keep held the bank when the heavy rain came.";
@@ -107,7 +89,6 @@ namespace ConNuoc.Core
             var engine = ConsequenceEngine.Instance;
             if (engine != null && engine.PendingCount > 0 && SeasonManager.Instance != null)
             {
-                // Time passes so the waiting consequence can land, then check again.
                 SeasonManager.Instance.AdvanceSeason();
                 QueueCheck();
                 yield break;
@@ -140,7 +121,6 @@ namespace ConNuoc.Core
             string body;
             if (cap != null && cap.IsUnlocked(AgencyTier.Institutional))
             {
-                // The ending depends on what the player asked the commune for.
                 if (resolver != null && resolver.HasFlag("petition_evidence") && !string.IsNullOrEmpty(institutionalEvidenceEnding))
                     body = institutionalEvidenceEnding;
                 else if (resolver != null && resolver.HasFlag("petition_quickfix") && !string.IsNullOrEmpty(institutionalQuickFixEnding))
@@ -151,7 +131,6 @@ namespace ConNuoc.Core
             else if (cap != null && cap.IsUnlocked(AgencyTier.Community)) body = communityEndingText;
             else body = personalEndingText;
 
-            // Add what happened to the reeds, so the ending says what caused the outcome.
             if (resolver != null)
             {
                 if (resolver.HasFlag("reeds_kept") && !string.IsNullOrEmpty(reedsKeptLine))

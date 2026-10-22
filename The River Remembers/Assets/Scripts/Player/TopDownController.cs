@@ -2,11 +2,6 @@ using UnityEngine;
 
 namespace ConNuoc.Player
 {
-    /// <summary>
-    /// Minimal 4-direction top-down movement for the prototype. Requires a Rigidbody2D
-    /// (set to Kinematic or Dynamic with gravity scale 0) and a Collider2D on the same object.
-    /// Uses the legacy Input Manager (Input.GetAxisRaw) so it works with no extra package setup.
-    /// </summary>
     [RequireComponent(typeof(Rigidbody2D))]
     public class TopDownController : MonoBehaviour
     {
@@ -27,12 +22,9 @@ namespace ConNuoc.Player
 
         private void Update()
         {
-            // Read input every frame; apply movement in FixedUpdate for consistent physics.
             float x = Input.GetAxisRaw("Horizontal");
             float y = Input.GetAxisRaw("Vertical");
 
-            // Favour 4-direction movement (no diagonal) to match a simple top-down tileset;
-            // delete this block if you want free 8-direction movement instead.
             if (Mathf.Abs(x) > Mathf.Abs(y)) y = 0f;
             else x = 0f;
 

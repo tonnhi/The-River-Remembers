@@ -30,6 +30,8 @@ MonoBehaviour:
     unlocksTier: 0
     tierUnlocked: 0
     setsFlag: cleared_drain
+    minigameSceneName: RubbishMinigame
+    minigameTimeBonusSeconds: 0
     hasDelayedConsequence: 0
     delayedConsequence:
       seasonsFromNow: 0
@@ -46,6 +48,8 @@ MonoBehaviour:
     unlocksTier: 0
     tierUnlocked: 0
     setsFlag: inspected_drain
+    minigameSceneName: RubbishMinigame
+    minigameTimeBonusSeconds: 5
     hasDelayedConsequence: 0
     delayedConsequence:
       seasonsFromNow: 0

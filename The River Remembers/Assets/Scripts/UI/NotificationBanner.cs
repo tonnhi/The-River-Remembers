@@ -6,12 +6,6 @@ using ConNuoc.Core;
 
 namespace ConNuoc.UI
 {
-    /// <summary>
-    /// A single queued banner line at the top of the screen, used for two things:
-    ///  - CapabilityManager.OnTierUnlocked  -> "New form of action unlocked: ..."
-    ///  - ConsequenceEngine.OnConsequenceFired -> the mentor's delayed-consequence explanation
-    /// Scene setup: a CanvasGroup with a TextMeshProUGUI child, start alpha 0.
-    /// </summary>
     public class NotificationBanner : MonoBehaviour
     {
         [SerializeField] private CanvasGroup canvasGroup;
@@ -24,9 +18,6 @@ namespace ConNuoc.UI
 
         private void Start()
         {
-            // Subscribing in Start (not OnEnable/Awake) sidesteps script-execution-order
-            // issues: every object's Awake has already run by the time any Start runs,
-            // so the singletons below are guaranteed to exist.
             if (CapabilityManager.Instance != null)
                 CapabilityManager.Instance.OnTierUnlocked += HandleTierUnlocked;
             if (ConsequenceEngine.Instance != null)

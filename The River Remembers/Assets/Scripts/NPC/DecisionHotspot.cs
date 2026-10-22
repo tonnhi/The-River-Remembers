@@ -6,17 +6,6 @@ using ConNuoc.UI;
 
 namespace ConNuoc.NPC
 {
-    /// <summary>
-    /// Put this on an NPC GameObject with a Collider2D (Is Trigger = on).
-    /// When the player is inside the trigger and presses the interact key, it opens
-    /// DialogueUI with this NPC's DecisionSO — if DecisionResolver says it's currently offerable.
-    ///
-    /// Visual feedback (both optional, tick/untick in the Inspector):
-    ///  - Tint:    NPC sprite is grey normally and turns red when you can talk to them.
-    ///  - Outline: a red outline/halo appears around the NPC when you can talk to them.
-    /// "Can talk" = player is in range AND the decision is currently offerable, so an NPC goes
-    /// back to idle once their decision is used up or while they're still locked behind a tier.
-    /// </summary>
     [RequireComponent(typeof(Collider2D))]
     public class DecisionHotspot : MonoBehaviour
     {
@@ -24,37 +13,41 @@ namespace ConNuoc.NPC
         [SerializeField] private KeyCode interactKey = KeyCode.E;
         [SerializeField] private GameObject promptIcon; // optional "!" icon, shown/hidden automatically
 
-        [Header("Visual feedback")]
-        [Tooltip("Leave empty to auto-find a SpriteRenderer on this object or its children.")]
         [SerializeField] private SpriteRenderer spriteRenderer;
 
         [SerializeField] private bool useTint = true;
         [SerializeField] private Color idleColor = new Color(0.55f, 0.55f, 0.55f, 1f);
         [SerializeField] private Color activeColor = new Color(1f, 0.25f, 0.25f, 1f);
+        [SerializeField] private Color completedColor = new Color(0.2f, 0.8f, 0.3f, 1f);
 
         [SerializeField] private bool useOutline = true;
         [SerializeField] private Color outlineColor = new Color(1f, 0.2f, 0.2f, 1f);
-        [Tooltip("How much bigger the outline sprite is than the NPC. 1.15 = a thin border.")]
         [SerializeField] private float outlineScale = 1.15f;
 
-        /// <summary>Every active hotspot in the scene (used by EndingManager).</summary>
         public static readonly List<DecisionHotspot> All = new List<DecisionHotspot>();
 
-        /// <summary>True if this NPC currently has something to offer, in range or not.</summary>
         public bool HasOfferableDecision =>
             DecisionResolver.Instance != null && DecisionResolver.Instance.CanOffer(decision);
 
+        public DecisionSO Decision => decision;
+
         private bool _playerInRange;
         private GameObject _outline;
+        private SpriteRenderer _outlineRenderer;
 
         private void OnEnable()
         {
             if (!All.Contains(this)) All.Add(this);
+            if (DecisionResolver.Instance != null) DecisionResolver.Instance.RegisterTask(decision);
         }
 
         private void OnDisable()
         {
             All.Remove(this);
+            if (DecisionResolver.Instance != null && !All.Exists(hotspot => hotspot.Decision == decision))
+            {
+                DecisionResolver.Instance.UnregisterTask(decision);
+            }
         }
 
         private void Reset()
@@ -67,11 +60,9 @@ namespace ConNuoc.NPC
             if (spriteRenderer == null) spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
             if (useOutline) BuildOutline();
-            SetHighlighted(false);
+            SetHighlightState(false, false);
         }
 
-        // Builds a slightly larger copy of the sprite behind the NPC, coloured red.
-        // No extra assets or shaders needed; works with any sprite.
         private void BuildOutline()
         {
             if (spriteRenderer == null || spriteRenderer.sprite == null) return;
@@ -80,38 +71,45 @@ namespace ConNuoc.NPC
             _outline.transform.SetParent(spriteRenderer.transform, false);
             _outline.transform.localScale = Vector3.one * outlineScale;
 
-            var sr = _outline.AddComponent<SpriteRenderer>();
-            sr.sprite = spriteRenderer.sprite;
-            sr.color = outlineColor;
-            sr.sortingLayerID = spriteRenderer.sortingLayerID;
-            sr.sortingOrder = spriteRenderer.sortingOrder - 1; // behind the NPC
+            _outlineRenderer = _outline.AddComponent<SpriteRenderer>();
+            _outlineRenderer.sprite = spriteRenderer.sprite;
+            _outlineRenderer.color = outlineColor;
+            _outlineRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
+            _outlineRenderer.sortingOrder = spriteRenderer.sortingOrder - 1; // behind the NPC
             _outline.SetActive(false);
         }
 
         private void Update()
         {
-            bool offerable = DecisionResolver.Instance != null && DecisionResolver.Instance.CanOffer(decision);
+            DecisionResolver resolver = DecisionResolver.Instance;
+            bool offerable = resolver != null && resolver.CanOffer(decision);
+            bool completed = resolver != null && resolver.IsCompleted(decision);
             bool canTalkNow = _playerInRange && offerable;
 
-            SetHighlighted(canTalkNow);
+            SetHighlightState(offerable, completed);
             if (promptIcon != null) promptIcon.SetActive(canTalkNow);
 
-            if (canTalkNow && Input.GetKeyDown(interactKey))
+            if (canTalkNow && Input.GetKeyDown(interactKey) && DialogueUI.Instance != null)
             {
                 DialogueUI.Instance.Open(decision);
             }
         }
 
-        private void SetHighlighted(bool on)
+        private void SetHighlightState(bool offerable, bool completed)
         {
+            Color highlightColor = completed ? completedColor : offerable ? activeColor : idleColor;
+
             if (useTint && spriteRenderer != null)
             {
-                spriteRenderer.color = on ? activeColor : idleColor;
+                spriteRenderer.color = highlightColor;
             }
-            if (_outline != null && _outline.activeSelf != on)
+
+            bool showOutline = offerable || completed;
+            if (_outline != null && _outline.activeSelf != showOutline)
             {
-                _outline.SetActive(on);
+                _outline.SetActive(showOutline);
             }
+            if (_outlineRenderer != null) _outlineRenderer.color = completed ? completedColor : outlineColor;
         }
 
         private void OnTriggerEnter2D(Collider2D other)

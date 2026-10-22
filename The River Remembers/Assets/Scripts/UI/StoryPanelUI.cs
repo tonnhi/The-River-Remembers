@@ -6,7 +6,6 @@ using TMPro;
 
 namespace ConNuoc.UI
 {
-    /// <summary>One page of story text: who is speaking, and what they say.</summary>
     [Serializable]
     public struct StoryPage
     {
@@ -14,32 +13,19 @@ namespace ConNuoc.UI
         [TextArea(3, 8)] public string text;
     }
 
-    /// <summary>
-    /// A paged story panel: speaker name + body text + a Next button.
-    /// Used for the opening "what is this village and what's at stake" scene, and it can be
-    /// reused for the ending: StoryPanelUI.Instance.Show(pages, onFinished).
-    ///
-    /// Scene setup: put this script on the Canvas (NOT on the panel itself, or the panel
-    /// can't be switched off). Create a child panel "StoryPanel" with:
-    ///   SpeakerText (TMP), BodyText (TMP), NextButton (Button - TMP) with a label.
-    /// Assign them below. Edit the intro pages in the Inspector.
-    /// </summary>
     public class StoryPanelUI : MonoBehaviour
     {
         public static StoryPanelUI Instance { get; private set; }
 
-        [Header("Refs")]
         [SerializeField] private GameObject panelRoot;
         [SerializeField] private TextMeshProUGUI speakerText;
         [SerializeField] private TextMeshProUGUI bodyText;
         [SerializeField] private Button nextButton;
         [SerializeField] private TextMeshProUGUI nextButtonLabel;
 
-        [Header("Labels")]
         [SerializeField] private string nextLabel = "Next";
         [SerializeField] private string lastPageLabel = "Begin";
 
-        [Header("Opening scene")]
         [SerializeField] private bool playIntroOnStart = true;
         [SerializeField]
         private StoryPage[] openingPages = new StoryPage[]
@@ -94,7 +80,6 @@ namespace ConNuoc.UI
             }
         }
 
-        /// <summary>Open the panel with the given pages. onFinished runs when the last page is dismissed.</summary>
         public void Show(StoryPage[] pages, Action onFinished = null, string lastLabelOverride = null)
         {
             _lastLabelOverride = lastLabelOverride;
@@ -132,8 +117,6 @@ namespace ConNuoc.UI
         {
             if (!IsOpen) return;
 
-            // Clear UI selection so the same Space/Enter press can't also "click" the
-            // just-pressed Next button and skip a page.
             if (EventSystem.current != null) EventSystem.current.SetSelectedGameObject(null);
 
             _index++;

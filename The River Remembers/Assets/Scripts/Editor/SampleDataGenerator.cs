@@ -5,20 +5,6 @@ using ConNuoc.Data;
 
 namespace ConNuoc.EditorTools
 {
-    /// <summary>
-    /// Generates the Xóm Sen decisions that follow the research paper's flooding scenario:
-    /// a blocked drain near the school, a farmer clearing canal-bank reeds, a market with
-    /// nowhere to put its rubbish, a community clean-up, and a request to the commune.
-    ///
-    /// It only creates ScriptableObject assets. No game systems change: it reuses the
-    /// existing tier unlocks, flags and the single delayed consequence (the heavy rain).
-    ///
-    /// Meter note: the paper's "Community" meter is the enum member MeterType.Trust in code.
-    /// Rename the HUD label to "Community" in the scene; no code change is needed.
-    ///
-    /// Run via the menu below. Re-running overwrites these 5 assets (it never touches the
-    /// older Decision_* assets in Assets/ScriptableObjects/Decisions).
-    /// </summary>
     public static class SampleDataGenerator
     {
         private const string FolderPath = "Assets/ScriptableObjects/XomSen";
@@ -53,8 +39,6 @@ namespace ConNuoc.EditorTools
             var existing = AssetDatabase.LoadAssetAtPath<DecisionSO>(path);
             if (existing != null)
             {
-                // Reuse the asset instead of deleting and recreating it, so NPCs that already
-                // point at it keep their Decision link when you re-run the generator.
                 return existing;
             }
 
@@ -68,7 +52,6 @@ namespace ConNuoc.EditorTools
             return new MeterDelta { meter = meter, amount = amount };
         }
 
-        // --- 1. Personal: Mai sees the blocked drain (the opening problem) ---
         private static void CreateBlockedDrain()
         {
             var d = CreateAsset("Decision_BlockedDrain");
@@ -87,7 +70,8 @@ namespace ConNuoc.EditorTools
                     Delta(MeterType.Ecology, 5),
                     Delta(MeterType.Resources, -5),
                 },
-                setsFlag = "cleared_drain"
+                setsFlag = "cleared_drain",
+                minigameSceneName = "RubbishMinigame"
             };
 
             var lookCloser = new DecisionOption
@@ -99,15 +83,15 @@ namespace ConNuoc.EditorTools
                     Delta(MeterType.Trust, 5),
                     Delta(MeterType.Resources, -5),
                 },
-                setsFlag = "inspected_drain"
+                setsFlag = "inspected_drain",
+                minigameSceneName = "RubbishMinigame",
+                minigameTimeBonusSeconds = 5f
             };
 
             d.options = new[] { clearIt, lookCloser };
             EditorUtility.SetDirty(d);
         }
 
-        // --- 2. Personal: the farmer clearing reeds. Holds the game's one delayed
-        //     consequence (the heavy rain). Both options queue it; the outcome differs. ---
         private static void CreateCanalReeds()
         {
             var d = CreateAsset("Decision_CanalReeds");
@@ -168,7 +152,6 @@ namespace ConNuoc.EditorTools
                 }
             };
 
-            // Chú Tư reacts to what you did at the market and the drain.
             d.promptVariants = new[]
             {
                 new PromptVariant
@@ -187,7 +170,6 @@ namespace ConNuoc.EditorTools
             EditorUtility.SetDirty(d);
         }
 
-        // --- 3. Personal: the market vendor. A second route to Community. ---
         private static void CreateMarketWaste()
         {
             var d = CreateAsset("Decision_MarketWaste");
@@ -209,7 +191,8 @@ namespace ConNuoc.EditorTools
                 },
                 unlocksTier = true,
                 tierUnlocked = AgencyTier.Community,
-                setsFlag = "bins_set"
+                setsFlag = "bins_set",
+                minigameSceneName = "BinPlacementMinigame"
             };
 
             var keepClearing = new DecisionOption
@@ -222,10 +205,11 @@ namespace ConNuoc.EditorTools
                     Delta(MeterType.Resources, -5),
                     Delta(MeterType.Trust, -5),
                 },
-                setsFlag = "kept_clearing_alone"
+                setsFlag = "kept_clearing_alone",
+                minigameSceneName = "BinPlacementMinigame",
+                minigameTimeBonusSeconds = 5f
             };
 
-            // Cô Hoa reacts to what you decided about the reeds.
             d.promptVariants = new[]
             {
                 new PromptVariant
@@ -244,7 +228,6 @@ namespace ConNuoc.EditorTools
             EditorUtility.SetDirty(d);
         }
 
-        // --- 4. Community tier: Bà Sáu helps Mai organise neighbours. Unlocks Institutional. ---
         private static void CreateCleanUp()
         {
             var d = CreateAsset("Decision_CleanUp");
@@ -280,7 +263,6 @@ namespace ConNuoc.EditorTools
                 }
             };
 
-            // Bà Sáu notices what got you here.
             d.promptVariants = new[]
             {
                 new PromptVariant
@@ -299,7 +281,6 @@ namespace ConNuoc.EditorTools
             EditorUtility.SetDirty(d);
         }
 
-        // --- 5. Institutional tier: the commune officer. Two different endings. ---
         private static void CreateCommuneRequest()
         {
             var d = CreateAsset("Decision_CommuneRequest");
@@ -335,7 +316,6 @@ namespace ConNuoc.EditorTools
                 setsFlag = "petition_quickfix"
             };
 
-            // The officer reacts to how the heavy rain turned out (if it has landed by now).
             d.promptVariants = new[]
             {
                 new PromptVariant

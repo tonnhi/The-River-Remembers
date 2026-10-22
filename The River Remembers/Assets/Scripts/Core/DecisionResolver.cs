@@ -2,28 +2,22 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using ConNuoc.Data;
+using ConNuoc.NPC;
 
 namespace ConNuoc.Core
 {
-    /// <summary>
-    /// Applies the effects of a chosen DecisionOption: immediate meter deltas, tier unlocks,
-    /// story flags, and queuing any delayed consequence. Also tracks which one-time decisions
-    /// have fired, and which story flags are set (flags are how one choice opens or closes
-    /// later conversations, so there is more than one path through the game).
-    /// </summary>
     public class DecisionResolver : MonoBehaviour
     {
         public static DecisionResolver Instance { get; private set; }
 
-        [Header("Pacing")]
-        [Tooltip("If ticked, one season passes after every decision you resolve, so delayed " +
-                 "consequences land as you play without needing the F5 debug key.")]
         [SerializeField] private bool advanceSeasonAfterDecision = true;
 
         private readonly HashSet<string> _completedDecisionIds = new HashSet<string>();
         private readonly HashSet<string> _flags = new HashSet<string>();
+        private readonly List<DecisionSO> _taskQueue = new List<DecisionSO>();
 
-        /// <summary>Fired after a choice has been fully applied: (decision, chosen option).</summary>
+        public IReadOnlyList<DecisionSO> TaskQueue => _taskQueue;
+
         public event Action<DecisionSO, DecisionOption> OnDecisionResolved;
 
         private void Awake()
@@ -36,7 +30,29 @@ namespace ConNuoc.Core
             Instance = this;
         }
 
-        public bool IsCompleted(DecisionSO decision) => _completedDecisionIds.Contains(decision.decisionId);
+        private void Start()
+        {
+            foreach (DecisionHotspot hotspot in DecisionHotspot.All)
+            {
+                if (hotspot != null) RegisterTask(hotspot.Decision);
+            }
+        }
+
+        public void RegisterTask(DecisionSO decision)
+        {
+            if (decision != null && !_taskQueue.Contains(decision))
+            {
+                _taskQueue.Add(decision);
+            }
+        }
+
+        public void UnregisterTask(DecisionSO decision)
+        {
+            _taskQueue.Remove(decision);
+        }
+
+        public bool IsCompleted(DecisionSO decision) =>
+            decision != null && _completedDecisionIds.Contains(decision.decisionId);
 
         public bool HasFlag(string flag) => !string.IsNullOrEmpty(flag) && _flags.Contains(flag);
 
@@ -48,6 +64,7 @@ namespace ConNuoc.Core
         public bool CanOffer(DecisionSO decision)
         {
             if (decision == null) return false;
+            if (_taskQueue.Count > 0 && !_taskQueue.Contains(decision)) return false;
             if (decision.oneTimeOnly && IsCompleted(decision)) return false;
             if (CapabilityManager.Instance != null && !CapabilityManager.Instance.IsUnlocked(decision.requiredTier))
                 return false;
@@ -57,6 +74,29 @@ namespace ConNuoc.Core
         }
 
         public void Resolve(DecisionSO decision, DecisionOption option)
+        {
+            if (!string.IsNullOrWhiteSpace(option.minigameSceneName))
+            {
+                if (MinigameManager.Instance == null)
+                {
+                    Debug.LogError("DecisionResolver: cannot start minigame scene '" +
+                                   option.minigameSceneName + "' because MinigameManager is missing.");
+                    return;
+                }
+
+                MinigameManager.Instance.StartMinigame(decision, option);
+                return;
+            }
+
+            ApplyOption(decision, option);
+        }
+
+        public void ResolveCompletedMinigame(DecisionSO decision, DecisionOption option)
+        {
+            ApplyOption(decision, option);
+        }
+
+        private void ApplyOption(DecisionSO decision, DecisionOption option)
         {
             if (MeterSystem.Instance != null)
             {

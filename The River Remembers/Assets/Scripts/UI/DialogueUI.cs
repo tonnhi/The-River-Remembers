@@ -7,21 +7,10 @@ using ConNuoc.Data;
 
 namespace ConNuoc.UI
 {
-    /// <summary>
-    /// The dialogue/choice panel. Opens with a DecisionSO, lists only the options whose
-    /// requiredTier is currently unlocked, and resolves whichever one the player clicks
-    /// through DecisionResolver.
-    ///
-    /// Scene setup: put this on a root Canvas panel (start inactive). Assign:
-    ///  - npcNameText, promptText  (TextMeshProUGUI)
-    ///  - optionButtonPrefab       (a Button with a child TextMeshProUGUI, as its own prefab)
-    ///  - optionsContainer         (a vertical layout group the buttons spawn into)
-    /// </summary>
     public class DialogueUI : MonoBehaviour
     {
         public static DialogueUI Instance { get; private set; }
 
-        [Header("Refs")]
         [SerializeField] private GameObject panelRoot;
         [SerializeField] private TextMeshProUGUI npcNameText;
         [SerializeField] private TextMeshProUGUI promptText;
@@ -62,8 +51,6 @@ namespace ConNuoc.UI
 
             if (_spawnedButtons.Count == 0)
             {
-                // Nothing selectable at the player's current capability: don't open (or pause
-                // for) a dialogue the player could never close.
                 Debug.LogWarning("DialogueUI: no options available for " + decision.decisionId);
                 _current = null;
                 return;
@@ -73,8 +60,6 @@ namespace ConNuoc.UI
             Time.timeScale = 0f; // pause movement while dialogue is open; remove if undesired
         }
 
-        // Picks the first prompt variant whose flag has been set, so NPCs can react to
-        // earlier choices. Falls back to the decision's default prompt.
         private static string ResolvePrompt(DecisionSO decision)
         {
             if (decision.promptVariants != null && DecisionResolver.Instance != null)
@@ -99,8 +84,6 @@ namespace ConNuoc.UI
             }
             finally
             {
-                // Always close and unpause, even if something in Resolve threw an error,
-                // so a bug can never leave the game frozen on a paused screen.
                 Close();
             }
         }

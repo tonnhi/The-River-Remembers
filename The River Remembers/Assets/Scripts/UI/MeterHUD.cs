@@ -5,11 +5,6 @@ using ConNuoc.Data;
 
 namespace ConNuoc.UI
 {
-    /// <summary>
-    /// Always-visible systems-map HUD: three Sliders (0-100), one per meter, so the player
-    /// can see trade-offs before confirming a choice, not just after (per the GDD).
-    /// Scene setup: three UI Sliders in a Canvas, assign one per field here.
-    /// </summary>
     public class MeterHUD : MonoBehaviour
     {
         [SerializeField] private Slider ecologySlider;
@@ -18,8 +13,6 @@ namespace ConNuoc.UI
 
         private void Start()
         {
-            // Subscribing in Start (not OnEnable/Awake) sidesteps script-execution-order
-            // issues: every object's Awake has already run by the time any Start runs.
             if (MeterSystem.Instance != null)
             {
                 MeterSystem.Instance.OnMeterChanged += HandleMeterChanged;
